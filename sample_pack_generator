@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Sample Pack Generator</title>
+<style>
+  body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background-color: #f9f9f9;
+  }
+  h1 { margin-bottom: 1rem; text-align:center;}
+  #samples { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-top:1rem; }
+  .sample {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  audio { width: 100%; margin-bottom: 0.5rem; }
+  button { margin: 0.5rem; padding: 0.4rem 0.8rem; border:none; border-radius:4px; background: #007bff; color:#fff; cursor:pointer; }
+  button:hover { background: #0056b3; }
+</style>
+</head>
+<body>
+
+<h1>Random Sample Pack Generator</h1>
+<button id="generate">Generate Random Samples</button>
+<button id="downloadPack">Download Sample Pack</button>
+
+<div id="samples"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+let currentSamples = [];
+const sampleCount = 5;
+
+// Fetch random audio from Internet Archive
+async function getRandomSamples() {
+  const queryUrl = `https://archive.org/advancedsearch.php?q=mediatype:(audio)&fl[]=identifier,title,creator,mediatype&sort=random&rows=${sampleCount}&page=1&output=json`;
+  const response = await fetch(queryUrl);
+  const data = await response.json();
+  const results = data.response.docs;
+
+  // Build direct mp3 links
+  return results.map(item => ({
+    title: item.title || item.identifier,
+    url: `https://archive.org/download/${item.identifier}/${item.identifier}_64kb.mp3` // 64kb mp3 preview
+  }));
+}
+
+function displaySamples(samples) {
+  const container = document.getElementById('samples');
+  container.innerHTML = '';
+  currentSamples = samples;
+
+  samples.forEach(sample => {
+    const div = document.createElement('div');
+    div.className = 'sample';
+    div.innerHTML = `
+      <strong>${sample.title}</strong>
+      <audio controls src="${sample.url}"></audio>
+      <a href="${sample.url}" download>Download</a>
+    `;
+    container.appendChild(div);
+  });
+}
+
+document.getElementById('generate').addEventListener('click', async () => {
+  const samples = await getRandomSamples();
+  displaySamples(samples);
+});
+
+document.getElementById('downloadPack').addEventListener('click', async () => {
+  if (!currentSamples.length) return alert('Generate samples first!');
+  
+  const zip = new JSZip();
+  for (const sample of currentSamples) {
+    try {
+      const response = await fetch(sample.url);
+      const blob = await response.blob();
+      zip.file(`${sample.title}.mp3`, blob);
+    } catch(err) {
+      console.warn(`Failed to fetch ${sample.title}`);
+    }
+  }
+
+  zip.generateAsync({ type: 'blob' }).then(content => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(content);
+    a.download = 'sample-pack.zip';
+    a.click();
+  });
+});
+</script>
+
+</body>
+</html>
