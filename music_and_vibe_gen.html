@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Art & Music Idea Generator</title>
   <style>
-    <style>
   body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     background: #fdfdfd;
@@ -18,10 +17,16 @@
     margin-bottom: 40px;
     font-size: 2.5rem;
   }
+  .main-controls {
+    text-align: center;
+    margin-bottom: 40px;
+  }
   .container {
     display: flex;
+    justify-content: center;
+    align-items: flex-start;
     gap: 40px;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
   }
   .column {
@@ -30,27 +35,31 @@
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .image-frame {
-    width: 100%;
-    padding-top: 100%;
+    width: 600px;
+    height: 600px;
     position: relative;
     border-radius: 12px;
     overflow: hidden;
     background: #f5f5f5;
     margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .image-frame img {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
   }
   button {
     padding: 14px 28px;
     font-size: 18px;
-    margin: 20px 0;
+    margin: 20px 10px;
     cursor: pointer;
     border: none;
     border-radius: 10px;
@@ -61,6 +70,10 @@
   }
   button:hover {
     background: #444;
+  }
+  .music-output {
+    width: 100%;
+    max-width: 600px;
   }
   .music-output p, .music-output pre {
     margin: 8px 0;
@@ -74,28 +87,37 @@
   a.met-link:hover {
     text-decoration: underline;
   }
-  @media(max-width: 900px) {
+  @media(max-width: 1300px) {
     .container {
       flex-direction: column;
+      align-items: center;
     }
   }
-</style>
   </style>
 </head>
-<body><h1>Song Idea Generator</h1>
+<body>
+  <h1>Song Idea Generator</h1>
+  
+  <div class="main-controls">
     <button onclick="generateBoth()">Generate Painting + Music Idea</button>
-
-  <div id="painting-section" class="section">
-    <h2>Painting</h2>
-    <div id="painting-container">
-      <p>Click the button to load a painting.</p>
-    </div>
+    <button onclick="downloadIdea()">Download Art & Music Idea</button>
   </div>
 
-  <div id="music-section" class="section">
-    <h2>Music Idea</h2>
-    <div id="music-container" class="music-output">
-      <p>Click the button to generate a music idea.</p>
+  <div class="container">
+    <!-- Painting Section -->
+    <div id="painting-section" class="column">
+      <h2>Painting</h2>
+      <div id="painting-container">
+        <p>Click the button to load a painting.</p>
+      </div>
+    </div>
+
+    <!-- Music Section -->
+    <div id="music-section" class="column">
+      <h2>Music Idea</h2>
+      <div id="music-container" class="music-output">
+        <p>Click the button to generate a music idea.</p>
+      </div>
     </div>
   </div>
 
@@ -127,11 +149,11 @@
 
           if (objectData && objectData.objectName && objectData.objectName.toLowerCase() === "painting" && objectData.primaryImage) {
             container.innerHTML = `
-              <h3>${objectData.title}</h3>
-              <p><strong>Artist:</strong> ${objectData.artistDisplayName || "Unknown"}</p>
-              <a class="met-link" href="${objectData.objectURL}" target="_blank">🔗 View on The MET's Website</a>
+              <h3 id="painting-title">${objectData.title}</h3>
+              <p><strong>Artist:</strong> <span id="painting-artist">${objectData.artistDisplayName || "Unknown"}</span></p>
+              <a id="painting-link" class="met-link" href="${objectData.objectURL}" target="_blank">🔗 View on The MET's Website</a>
               <div class="image-frame">
-                <img src="${objectData.primaryImage}" alt="${objectData.title}">
+                <img id="painting-img" src="${objectData.primaryImage}" alt="${objectData.title}">
               </div>
             `;
             return;
@@ -148,85 +170,33 @@
     // -----------------------
     // Musical Idea Generator
     // -----------------------
-    const atmospheres = [
-      "Apocalyptic","Bright","Cold","Dark","Epic","Ethereal","Futuristic","Hazy","Hypnotic","Mechanical",
-      "Medieval","Natural","Nocturnal","Party","Pastoral","Peaceful","Psychedelic","Autumn","Spring","Summer",
-      "Winter","Space","Spiritual","Surreal","Urban","Warm"
-    ];
-    const moods = [
-      "Angry","Aggressive","Anxious","Bittersweet","Calm","Disturbing","Energetic","Happy","Lethargic",
-      "Longing","Mellow","Passionate","Playful","Quirky","Romantic","Sad","Depressive","Lonely","Melancholic",
-      "Sombre","Sensual","Sentimental","Uplifting","Triumphant"
-    ];
-    const styles = [
-      "Angular","Anthemic","Atmospheric","Atonal","Avant-garde","Chaotic","Complex","Dense","Dissonant",
-      "Eclectic","Heavy","Lush","Maximalist","Melodic","Microtonal","Minimalistic","Noisy","Polyphonic",
-      "Polyrhythmic","Progressive","Raw","Repetitive","Rhythmic","Bouncy","Punchy","Smooth","Soft","Sparse",
-      "Technical","Theatrical"
-    ];
-    const themes = [
-      "Abstract","Adolescence","Afterlife","Ageing","Alienation","Aliens","Apology","Betrayal","Infidelity",
-      "Birthday","Childhood","Community","Conscious","Conspiracy","Crime","Dancing","Death","Domestic",
-      "Dystopian","Cyberpunk","Educational","Escapism","Failure","Fame","Family","Parenthood","Fantasy",
-      "Fashion","Film","Folklore","Food","Friendship","Greed","Grief","Health","Disease","Fitness","Mental health",
-      "Addiction","Sobriety","Hedonistic","History","Antiquity","Prehistory","Holiday","Vegetarianism","Internet",
-      "Introspective","Regret","Leisure","Literature","Love","Breakup","Loyalty","Marriage","Money","Mythology",
-      "Nature","Animals","Nostalgia","Obsession","Occult","Paranoia","Paranormal","Patriotic","Philosophical",
-      "Existential","Nihilistic","Pirates","Police","Prison","School","Science fiction","Self-hatred","Self-love",
-      "Sexual","Sleep","Dreams","Sports","Suburban","Television","Travel","Vehicles","Video games","Vikings",
-      "Violence","War","Wild West","Work"
-    ];
-    const genres = [
-      "Chiptune","16-bit","Bitpop","Celtic Electronica","Chillout","Ambient Dub","Ambient House","Ambient Trance",
-      "Balearic Beat","Downtempo","Trip Hop","Electroacoustic","Musique concrète","Electro-Industrial","Dark Electro",
-      "Balearic Beat","Breakbeat","Acid Breaks","Big Beat","Breakbeat Hardcore","Progressive Breaks","Broken Beat",
-      "Bubblegum Bass","Deconstructed Club","Digital Cumbia","Drum and Bass","Atmospheric Drum and Bass",
-      "Dancefloor Drum and Bass","Footwork Jungle","Jazzstep","Jungle","Liquid Drum and Bass","Minimal Drum and Bass",
-      "Dubstep","Brostep","Chillstep","Melodic Dubstep","Jersey Club","EBM","Dark Electro","Futurepop","New Beat",
-      "Electroclash","Electro-Disco","Hi-NRG","Italo-Disco","Spacesynth","Space Disco","Electro latino","Electro Swing",
-      "Eurobeat","Eurodance","Bubblegum Dance","Italo Dance","Footwork","Freestyle","Latin Freestyle","Funk mandelão",
-      "Jungle Dutch","Future Bass","Ghettotech","Glitch Hop","Grime","Neo-Grime","Acidcore","Breakbeat Hardcore",
-      "Hardcore Breaks","Breakcore","Digital Hardcore","Speed House","House","Acid House","Afro House","3-Step",
-      "Afropiano","Ambient House","Ballroom","Baltimore Club","Bass House","Speed House","Deep House","Lo-Fi House",
-      "Diva House","Electro House","Complextro","Dutch House","Fidget House","French Electro","Euro House",
-      "Festival Progressive House","French House","Funky House","Future Funk","Future House","Garage House",
-      "Gospel House","G-House","Hip House","Italo House","Latin House","Melodic House","Microhouse","Organic House",
-      "Outsider House","Lo-Fi House","Progressive House","Speed Garage","Tech House","Tribal House","Tropical House",
-      "UK Hard House","Hardbass","Hyper Techno","Kuduro","Melodic Bass","Midtempo Bass","Moombahton","Nu-Disco",
-      "Post-Dubstep","Techno","Acid Techno","Ambient Techno","Detroit Techno","Hard Techno","Industrial Techno",
-      "Melodic Techno","Minimal Techno","Dub Techno","Wonky Techno","Techno Bass","Trance","Acid Trance","Dream Trance",
-      "Hands Up","Hard Trance","Ibiza Trance","Progressive Trance","Psytrance","Progressive Psytrance","Tech Trance",
-      "Trap","Hybrid Trap","UK Bass","UK Funky","UK Garage","2-Step","Breakstep","Future Garage","Speed Garage",
-      "Wonky","Electropop","Folktronica","Funktronica","Glitch","Glitch Hop","Horror Synth","Hyperpop","IDM",
-      "Drill and Bass","Illbient","Indietronica","Chillwave","Glitch Pop","Picopop","Latin Electronic","Electro latino",
-      "Electrotango","Livetronica","Minimal Synth","Moogsploitation","Nightcore","Nu Jazz","Power Electronics",
-      "Death Industrial","Power Noise","Progressive Electronic","Space Ambient","Synthpop","Futurepop","Synth Punk",
-      "Synthwave","Chillsynth","Darksynth","Tecnofunk","Dreampunk","Future Funk","Vaporwave","Neo-Grime","Witch House",
-      "Ambient Pop","Ambient","Alternative Dance","Grebo","New Rave","Dance-Pop","Latin Disco","Nu-Disco","Afrobeats",
-      "Alt-Pop","Art Pop","Folk Pop","Bedroom Pop","Jazz Pop","Pop Rock","Vocal Trance","Dream Pop","Contemporary R&B",
-      "Alternative R&B","Funk","Jazz-Funk","Soul","Pop Soul"
-    ];
+    const atmospheres = ["Apocalyptic","Bright","Cold","Dark","Epic","Ethereal","Futuristic","Hazy","Hypnotic","Mechanical","Medieval","Natural","Nocturnal","Party","Pastoral","Peaceful","Psychedelic","Autumn","Spring","Summer","Winter","Space","Spiritual","Surreal","Urban","Warm"];
+    const moods = ["Angry","Aggressive","Anxious","Bittersweet","Calm","Disturbing","Energetic","Happy","Lethargic","Longing","Mellow","Passionate","Playful","Quirky","Romantic","Sad","Depressive","Lonely","Melancholic","Sombre","Sensual","Sentimental","Uplifting","Triumphant"];
+    const styles = ["Angular","Anthemic","Atmospheric","Atonal","Avant-garde","Chaotic","Complex","Dense","Dissonant","Eclectic","Heavy","Lush","Maximalist","Melodic","Microtonal","Minimalistic","Noisy","Polyphonic","Polyrhythmic","Progressive","Raw","Repetitive","Rhythmic","Bouncy","Punchy","Smooth","Soft","Sparse","Technical","Theatrical"];
+    const themes = ["Abstract","Adolescence","Afterlife","Ageing","Alienation","Aliens","Apology","Betrayal","Infidelity","Birthday","Childhood","Community","Conscious","Conspiracy","Crime","Dancing","Death","Domestic","Dystopian","Cyberpunk","Educational","Escapism","Failure","Fame","Family","Parenthood","Fantasy","Fashion","Film","Folklore","Food","Friendship","Greed","Grief","Health","Disease","Fitness","Mental health","Addiction","Sobriety","Hedonistic","History","Antiquity","Prehistory","Holiday","Vegetarianism","Internet","Introspective","Regret","Leisure","Literature","Love","Breakup","Loyalty","Marriage","Money","Mythology","Nature","Animals","Nostalgia","Obsession","Occult","Paranoia","Paranormal","Patriotic","Philosophical","Existential","Nihilistic","Pirates","Police","Prison","School","Science fiction","Self-hatred","Self-love","Sexual","Sleep","Dreams","Sports","Suburban","Television","Travel","Vehicles","Video games","Vikings","Violence","War","Wild West","Work"];
+    const genres = ["Chiptune","Bitpop","Celtic Electronica","Chillout","Ambient Dub","Ambient House","Ambient Trance","Downtempo","Trip Hop","Drum and Bass","Dubstep","Future Bass","House","Lo-Fi House","Progressive House","Techno","Trance","Trap","UK Garage","Electropop","Hyperpop","IDM","Indietronica","Synthwave","Vaporwave","Witch House","Dream Pop","Contemporary R&B","Alternative R&B","Funk","Jazz-Funk","Soul","Pop Soul"];
 
     function randomItem(list) {
-    return list[Math.floor(Math.random() * list.length)];
-  }
+      return list[Math.floor(Math.random() * list.length)];
+    }
 
-  function generateChordProgression() {
-    const chords = ["I","ii","iii","IV","V","vi","vii°"];
-    const sections = ["Intro", "Verse", "Bridge", "Chorus"];
-    let progression = "";
+    function generateChordProgression() {
+      const chords = ["I","ii","iii","IV","V","vi","vii°"];
+      const sections = ["Intro", "Verse", "Bridge", "Chorus"];
+      let progression = "";
 
-    sections.forEach(section => {
-      const numChords = Math.floor(Math.random() * 4) + 3; // 3–6 chords
-      let sectionChords = [];
-      for (let c = 0; c < numChords; c++) {
-        sectionChords.push(randomItem(chords));
-      }
-      progression += `${section}: ${sectionChords.join(" - ")}\n`;
-    });
+      sections.forEach(section => {
+        const numChords = Math.floor(Math.random() * 4) + 3; // 3–6 chords
+        let sectionChords = [];
+        for (let c = 0; c < numChords; c++) {
+          sectionChords.push(randomItem(chords));
+        }
+        progression += `${section}: ${sectionChords.join(" - ")}\n`;
+      });
 
-    return progression;
-  }
+      return progression;
+    }
+
     function generateMusicIdea() {
       const atmosphere = randomItem(atmospheres);
       const mood = randomItem(moods);
@@ -249,6 +219,24 @@
     function generateBoth() {
       getRandomPainting();
       generateMusicIdea();
+    }
+
+    // -----------------------
+    // Download Function
+    // -----------------------
+    function downloadIdea() {
+      const title = document.getElementById("painting-title")?.innerText || "Unknown";
+      const artist = document.getElementById("painting-artist")?.innerText || "Unknown";
+      const link = document.getElementById("painting-link")?.href || "N/A";
+      const musicText = document.getElementById("music-container").innerText || "No music idea generated.";
+
+      let content = `🎨 Painting\nTitle: ${title}\nArtist: ${artist}\nLink: ${link}\n\n🎶 Music Idea\n${musicText}`;
+
+      const blob = new Blob([content], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "Art_Music_Idea.txt";
+      a.click();
     }
   </script>
 </body>
